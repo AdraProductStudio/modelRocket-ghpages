@@ -213,4 +213,15 @@ code {
 .infoToast{
   color: #65a3ff;
   font-size: 4rem;
+
 }
+
+
+.chatbot-btn{
+  cursor: not-allowed !important;
+}
+/* .disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+} */
+

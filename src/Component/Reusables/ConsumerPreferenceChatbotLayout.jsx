@@ -300,6 +300,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         try {
             const result = await axiosInstance.post("/chatbot", requiredParams)
+            console.log(result)
             if (result.data.error_code === 200) {
                 setTimeout(() => {
                     getOfferProduct()
@@ -382,6 +383,9 @@ const ConsumerPreferenceChatbotLayout = () => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
         const essenceMessage = { text: "...", user: false };
+
+        console.log(essenceMessage)
+
         setMessages((prevMessages) => [...prevMessages, essenceMessage]);
         setTimeout(() => {
             document.querySelector("#scrollView").scrollIntoView({
