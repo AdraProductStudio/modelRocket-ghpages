@@ -387,7 +387,7 @@ const Home = () => {
                     <button type="button" className={`${(activeButton && productViewType[product.id]) === 'Slider' ? "btn btn-sm btn-primary w-40 viewButton" : "btn btn-sm btn-outline-secondary w-40 viewButton"}`} onClick={() => handleProductViewType(product.id, "Slider")} >
                       Slider
                     </button>
-                    <button  disabled={product.name === "" || product.name === "" ? true : false } className={`${(activeButton && productViewType[product.id]) === 'Chatbot' ? "btn btn-sm btn-primary w-40 viewButton " : "btn btn-sm btn-outline-secondary w-40 viewButton "}`} onClick={() => handleProductViewType(product.id, "Chatbot")}>
+                    <button  disabled={product.name === "TII" || product.name === "TII-2" ? true : false } className={`${(activeButton && productViewType[product.id]) === 'Chatbot' ? "btn btn-sm btn-primary w-40 viewButton " : "btn btn-sm btn-outline-secondary w-40 viewButton "}`} onClick={() => handleProductViewType(product.id, "Chatbot")}>
                       Chatbot
                     </button>
                   </div>

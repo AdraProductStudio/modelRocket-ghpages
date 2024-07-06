@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://10.10.24.1:5000",
+  baseURL: "https://consumerapi.matsuritech.com",
   headers: {
     "Content-Type": "application/json",
   },
