@@ -9,7 +9,7 @@ import { DataProvider } from "./Component/CommonContext";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       <DataProvider>
         <Toaster />
         <Routes>
