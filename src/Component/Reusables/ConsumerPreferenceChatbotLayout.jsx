@@ -416,6 +416,8 @@ const ConsumerPreferenceChatbotLayout = () => {
         setMessages([]);
         setShowGraphSection(false)
         setDotIconDropdown(false);
+        setProductComparison([])
+        setViewGraph(false)
     };
 
 
