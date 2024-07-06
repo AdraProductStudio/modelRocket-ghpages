@@ -92,10 +92,11 @@ const ConsumerPreferenceChatbotLayout = () => {
                 client_id: localStorage.getItem("client_id"),
                 product_category_id: localStorage.getItem("product_id"),
                 msg: userTextInput,
+                flag: "init"
             }
 
             try {
-
+                console.log(requiredParams, "useEffect")
                 await axiosInstance.post("/chatbot", requiredParams).then((response) => {
                     console.log(response)
                     setchatbotMessage(response.data.message)
@@ -296,17 +297,18 @@ const ConsumerPreferenceChatbotLayout = () => {
 
 
     // Chatbot
-    const chatbotResponse = async (userInput) => {
+    const chatbotResponse = async (userInput,stage) => {
 
         var requiredParams = {
             client_id: localStorage.getItem("client_id"),
             product_category_id: localStorage.getItem("product_id"),
             msg: userInput,
+            flag: stage
         }
 
         try {
 
-            console.log(requiredParams)
+            console.log(requiredParams,"chatbotResponse function")
 
             const result = await axiosInstance.post("/chatbot", requiredParams)
             console.log(result)
@@ -391,7 +393,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         }, 1);
 
-        const response = await chatbotResponse(input);
+        const response = await chatbotResponse(input,"steps");
 
         const newEssenceMessage = { text: response, user: false };
         setMessages((prevMessages) => [
@@ -418,6 +420,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         setDotIconDropdown(false);
         setProductComparison([])
         setViewGraph(false)
+        chatbotResponse("","reset")
     };
 
 
