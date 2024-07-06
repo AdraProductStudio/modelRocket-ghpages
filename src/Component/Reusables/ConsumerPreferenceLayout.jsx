@@ -147,7 +147,7 @@ const ConsumerPreferenceLayout = () => {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
       } else {
-        toast.error(response.data.message);
+        console.log(response.data.message);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -184,7 +184,7 @@ const ConsumerPreferenceLayout = () => {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
       } else {
-        toast.error(response.data.message);
+        console.log(response.data.message);
       }
     } catch (error) {
       console.error("Error:", error);

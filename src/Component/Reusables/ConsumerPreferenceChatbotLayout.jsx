@@ -56,6 +56,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
             try {
                 await axiosInstance.post("/get_attributes", getProduct).then((res) => {
+                    console.log(res)
                     setInitialGlow(false);
                     setApiRequest(res.data.data);
                     setMainCriteriaPairs(res.data.data.main_criteria_pairs);
@@ -96,6 +97,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             try {
 
                 await axiosInstance.post("/chatbot", requiredParams).then((response) => {
+                    console.log(response)
                     setchatbotMessage(response.data.message)
                 }).catch((err) => {
                     console.log(err)
@@ -213,11 +215,13 @@ const ConsumerPreferenceChatbotLayout = () => {
             );
 
             if (response.data.error_code === 200) {
+                console.log(response)
+
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
 
             } else {
-                toast.error(response.data.message);
+                console.log(response.data.message);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -251,10 +255,12 @@ const ConsumerPreferenceChatbotLayout = () => {
 
 
             if (response.data.error_code === 200) {
+                console.log(response)
+
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
             } else {
-                toast.error(response.data.message);
+                console.log(response.data.message);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -299,41 +305,29 @@ const ConsumerPreferenceChatbotLayout = () => {
         }
 
         try {
+
+            console.log(requiredParams)
+
             const result = await axiosInstance.post("/chatbot", requiredParams)
             console.log(result)
             if (result.data.error_code === 200) {
+
                 setTimeout(() => {
                     getOfferProduct()
                 }, 2000);
                 return result.data.data
+            } else if (result.data.error_code === 500 && result.data.data == {}) {
+                return "Hey! Something went wrong. Can you please ask again"
+
             } else {
-                return result.data.data
+                console.log(result.data.message)
+                return "Hey! Something went wrong. Can you please ask again"
             }
         } catch (err) {
             console.log(err)
         }
 
 
-
-        // try {
-        //     const response = await fetch("http://10.10.24.3:5000/chatbot_user", {
-        //         method: "POST",
-        //         headers: {
-        //             Authorization: "Bearer " + apiToken,
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify(doChatParams),
-        //     }).then((response) => response.json());
-        //     console.log(response);
-
-        //     inputRef.current.focus()
-        //     return response.message;
-        // } catch (error) {
-
-        //     inputRef.current.focus()
-        //     console.error("Error communicating with the API:", error.message);
-        //     return "";
-        // }
     };
 
 
@@ -352,10 +346,12 @@ const ConsumerPreferenceChatbotLayout = () => {
 
 
             if (response.data.error_code === 200) {
+                console.log(response)
+
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
             } else {
-                toast.error(response.data.message);
+                console.log(response.data.message);
             }
         } catch (error) {
             console.error("Error:", error);

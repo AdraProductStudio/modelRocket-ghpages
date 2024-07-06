@@ -53,6 +53,7 @@ const Home = () => {
       try {
         const response = await axiosInstance.get("/get_clients");
         if (response.data.error_code === 200) {
+          console.log(response)
           setProducts(response.data.data);
           setInitialGlow(false);
         } else {
