@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
-import toast from "react-hot-toast";
 import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
 import Slider from "react-slick";
 import { Tooltip } from "react-tooltip";
@@ -42,6 +41,8 @@ const ConsumerPreferenceChatbotLayout = () => {
 
     const [chatbotMessage, setchatbotMessage] = useState("")
 
+    const [conversationId, setConversationId] = useState(null)
+    const [init, setInit] = useState(false)
 
 
     useEffect(() => {
@@ -55,8 +56,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
 
             try {
-                await axiosInstance.post("/get_attributes", getProduct).then((res) => {
-                    console.log(res)
+                await axiosInstance.post("/get_attributes", getProduct).then((res) => {                    
                     setInitialGlow(false);
                     setApiRequest(res.data.data);
                     setMainCriteriaPairs(res.data.data.main_criteria_pairs);
@@ -82,24 +82,29 @@ const ConsumerPreferenceChatbotLayout = () => {
         }
     }, []);
 
+  
+    
 
+    const [randomNumber, setRandomNumber] = useState(Math. floor(Math. random() * (9999999999 - 1000000000 + 1)) + 1000000000)
 
     useEffect(() => {
-
+        setRandomNumber(randomNumber)
         const getChatbot = async () => {
 
+                                       
             var requiredParams = {
                 client_id: localStorage.getItem("client_id"),
                 product_category_id: localStorage.getItem("product_id"),
                 msg: userTextInput,
-                flag: "init"
+                flag: "init",
+                usr_phoneno:randomNumber
             }
 
-            try {
-                console.log(requiredParams, "useEffect")
+            try {                
                 await axiosInstance.post("/chatbot", requiredParams).then((response) => {
-                    console.log(response)
-                    setchatbotMessage(response.data.message)
+                    console.log(response)                    
+                    setchatbotMessage(response.data.data.message)
+                    setConversationId(response.data.data.conversation_id)
                 }).catch((err) => {
                     console.log(err)
                 })
@@ -110,7 +115,9 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         getChatbot()
 
-    }, [])
+    }, [init])
+
+    
 
 
     useEffect(() => {
@@ -122,30 +129,6 @@ const ConsumerPreferenceChatbotLayout = () => {
 
 
 
-    // Chatbot
-    // useEffect(() => {
-    //     const getToken = async () => {
-    //         let username = "inflectra##widget";
-
-    //         try {
-    //             const response = await fetch("http://10.10.24.3:5000/gettoken", {
-    //                 method: "GET",
-    //                 headers: {
-    //                     Authorization: `Basic ${btoa(username)}`,
-    //                 },
-    //             })
-    //                 .then((res) => res.json())
-    //                 .then((data) => {
-    //                     if (data.status_code === 201) {
-    //                         setapiToken(data.access_token);
-    //                     }
-    //                 });
-    //         } catch (err) {
-    //             console.log(err);
-    //         }
-    //     };
-    //     getToken();
-    // }, []);
 
 
     const convertSliderValue = (value) => {
@@ -215,14 +198,12 @@ const ConsumerPreferenceChatbotLayout = () => {
                 updatedApiRequest
             );
 
-            if (response.data.error_code === 200) {
-                console.log(response)
+            if (response.data.error_code === 200) {                
 
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
 
             } else {
-                console.log(response.data.message);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -254,14 +235,10 @@ const ConsumerPreferenceChatbotLayout = () => {
                 updatedApiRequest
             );
 
-
-            if (response.data.error_code === 200) {
-                console.log(response)
-
+            if (response.data.error_code === 200) {                
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
             } else {
-                console.log(response.data.message);
             }
         } catch (error) {
             console.error("Error:", error);
@@ -299,30 +276,33 @@ const ConsumerPreferenceChatbotLayout = () => {
     // Chatbot
     const chatbotResponse = async (userInput,stage) => {
 
+
+        
+
         var requiredParams = {
             client_id: localStorage.getItem("client_id"),
             product_category_id: localStorage.getItem("product_id"),
             msg: userInput,
-            flag: stage
+            flag: stage,
+            usr_phoneno:randomNumber
         }
+
+
 
         try {
 
-            console.log(requiredParams,"chatbotResponse function")
 
-            const result = await axiosInstance.post("/chatbot", requiredParams)
-            console.log(result)
+            const result = await axiosInstance.post("/chatbot", requiredParams)            
             if (result.data.error_code === 200) {
-
+                console.log(result)
                 setTimeout(() => {
                     getOfferProduct()
                 }, 2000);
-                return result.data.data
-            } else if (result.data.error_code === 500 && result.data.data == {}) {
+                return result.data.data.message
+            } else if (result.data.error_code === 500 && result.data.data.message == {}) {
                 return "Hey! Something went wrong. Can you please ask again"
 
             } else {
-                console.log(result.data.message)
                 return "Hey! Something went wrong. Can you please ask again"
             }
         } catch (err) {
@@ -337,6 +317,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         const requiredParams = {
             product_category_id: localStorage.getItem("product_id"),
+            conversation_id: conversationId
         }
 
         try {
@@ -345,15 +326,19 @@ const ConsumerPreferenceChatbotLayout = () => {
                 requiredParams
             );
 
-
-
-            if (response.data.error_code === 200) {
-                console.log(response)
-
+            if (response.data.error_code === 200) {  
+                           
                 setProductComparison(response.data.data.product_comparisons);
                 setGraphData(response.data.data.criteria_weights);
-            } else {
-                console.log(response.data.message);
+            } else if(response.data.error_code === 404 && response.data.message === "Product offer not found.") {
+                const newData = {};
+                for (let key in graphData) {
+                if (graphData.hasOwnProperty(key)) {
+                    newData[key] = 0.25;
+                    }
+                 }
+               setGraphData(newData)  
+               setInit(!init)
             }
         } catch (error) {
             console.error("Error:", error);
@@ -381,9 +366,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
         const essenceMessage = { text: "...", user: false };
-
-        console.log(essenceMessage)
-
+        
         setMessages((prevMessages) => [...prevMessages, essenceMessage]);
         setTimeout(() => {
             document.querySelector("#scrollView").scrollIntoView({
@@ -393,7 +376,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         }, 1);
 
-        const response = await chatbotResponse(input,"steps");
+        const response = await chatbotResponse(input,"step");
 
         const newEssenceMessage = { text: response, user: false };
         setMessages((prevMessages) => [

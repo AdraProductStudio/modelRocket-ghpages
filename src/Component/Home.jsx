@@ -77,6 +77,7 @@ const Home = () => {
         client_id: localStorage.getItem("client_id"),
       })
       .then((response) => {
+        console.log(response)
         if (response.data.error_code === 200) {
           setProductCategory(response.data.data);
 
