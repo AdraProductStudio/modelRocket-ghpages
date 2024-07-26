@@ -313,7 +313,8 @@ const AdminForm1 = () => {
                                         <option value="">select client</option>
                                         {
                                             clientDetails.map((v, i) => {
-                                                return <option value={[v.id, v.services[0].id]} key={i}>{v.name}</option>
+
+                                                 return v.name === "Toyota" ? null : <option value={[v.id, v.services[0].id]} key={i}>{v.name}</option>
                                             })
                                         }
                                     </select>
@@ -485,13 +486,13 @@ const AdminForm1 = () => {
                             <div className="card">
                                 <div className="card-body ">
                                     <h5 className='fw-bold'>Attributes</h5>
-                                    {/* <div className="criteria-edit-btn">
+                                    <div className="criteria-edit-btn">
                                         <button type='button' className='btn btn-primary' onClick={() => {
                                             handleCriteriaEdit()
                                             setvalidation(false)
                                             setCriteriaDataDupli(criteriaData)
                                         }} data-bs-toggle="modal" data-bs-target="#criteriaModal"><CiEdit className='fs-5' /></button>
-                                    </div> */}
+                                    </div>
                                     <div className="row gy-3 py-4">
                                         {
                                             criteriaData.map((v, i) => {
