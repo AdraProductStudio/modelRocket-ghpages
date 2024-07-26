@@ -66,8 +66,12 @@ code {
   background-color: var(--nav-bg-color);
 }
 
-.admin-page-content-height{
+/* .admin-page-content-height{
   height: calc(100vh - var(--nav-height));
+} */
+.admin-page-content-height{
+  height: 82vh;
+  overflow-y: auto;
 }
 
 .content-body-height{

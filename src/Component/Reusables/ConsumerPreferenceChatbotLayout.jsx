@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import axiosInstance from "../../Services/axiosInstance";
 import { DataAnalysisGrapgh } from "./DataAnalysisGrapgh";
-import Slider from "react-slick";
 import { Tooltip } from "react-tooltip";
 import { FaInfoCircle } from "react-icons/fa";
 import '../../../src/ConsumerPreferenceChatbotLayout.css'
-import { SiChatbot } from "react-icons/si";
 import { IoPerson } from "react-icons/io5";
 import botImage from "../assets/model-rocket-bot.svg"
 
@@ -50,7 +48,8 @@ const ConsumerPreferenceChatbotLayout = () => {
         const get_attributes = async () => {
             const getProduct = {
                 client_id: localStorage.getItem("client_id"),
-                product_category_id: localStorage.getItem("product_id"),
+                service_id:localStorage.getItem("service_id"),
+                product_id: localStorage.getItem("product_id"),
             };
 
 
@@ -94,11 +93,14 @@ const ConsumerPreferenceChatbotLayout = () => {
                                        
             var requiredParams = {
                 client_id: localStorage.getItem("client_id"),
-                product_category_id: localStorage.getItem("product_id"),
+                product_id: localStorage.getItem("product_id"),
+                service_id:localStorage.getItem("service_id"),
                 msg: userTextInput,
                 flag: "init",
                 usr_phoneno:randomNumber
             }
+
+           
 
             try {                
                 await axiosInstance.post("/chatbot", requiredParams).then((response) => {
@@ -179,6 +181,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             updatedApiRequest = {
                 ...apiRequest,
                 user_importance: sliderValues.map(convertSliderValue),
+                filters:{"criteria":"","condition":"","value1":"","value2":""}
             };
 
             next()
@@ -187,6 +190,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             updatedApiRequest = {
                 ...params.requestData,
                 user_importance: defaultValuesSetting,
+                filters:{"criteria":"","condition":"","value1":"","value2":""}
             };
 
         }
@@ -227,6 +231,7 @@ const ConsumerPreferenceChatbotLayout = () => {
             user_importance: Array(mainCriteriaPairs.length)
                 .fill(5)
                 .map(convertSliderValue),
+                filters:{"criteria":"","condition":"","value1":"","value2":""}
         };
 
         try {
@@ -281,7 +286,8 @@ const ConsumerPreferenceChatbotLayout = () => {
 
         var requiredParams = {
             client_id: localStorage.getItem("client_id"),
-            product_category_id: localStorage.getItem("product_id"),
+            product_id: localStorage.getItem("product_id"),
+            service_id:localStorage.getItem("service_id"),
             msg: userInput,
             flag: stage,
             usr_phoneno:randomNumber
@@ -316,9 +322,11 @@ const ConsumerPreferenceChatbotLayout = () => {
     const getOfferProduct = async () => {
 
         const requiredParams = {
-            product_category_id: localStorage.getItem("product_id"),
+            product_id: localStorage.getItem("product_id"),
             conversation_id: conversationId
         }
+
+        console.log(requiredParams)
 
         try {
             const response = await axiosInstance.post(

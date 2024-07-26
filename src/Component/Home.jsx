@@ -9,18 +9,14 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import CommonContext from "./CommonContext";
 
 const Home = () => {
-
-  const {
-    productViewType,
-    setProductViewType
-  } = useContext(CommonContext)
+  const { productViewType, setProductViewType } = useContext(CommonContext);
 
   const [products, setProducts] = useState([]);
   const [initialGlow, setInitialGlow] = useState(false);
   const [productCategory, setProductCategory] = useState([]);
 
-  const [activeButton, setActiveViewTypeButton] = useState('')
-  const [enableViewButton, setEnableViewButton] = useState(null)
+  const [activeButton, setActiveViewTypeButton] = useState("");
+  const [enableViewButton, setEnableViewButton] = useState(null);
   const [formData, setFormData] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -41,7 +37,6 @@ const Home = () => {
 
   const [btnLoading, setBtnLoading] = useState(false);
 
-
   const [mainCreteriaContent, setMainCreteriaContent] = useState(false);
 
   const pageNavigate = useNavigate();
@@ -53,7 +48,6 @@ const Home = () => {
       try {
         const response = await axiosInstance.get("/get_clients");
         if (response.data.error_code === 200) {
-          console.log(response)
           setProducts(response.data.data);
           setInitialGlow(false);
         } else {
@@ -68,19 +62,22 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const redirectCategoryPage = (id) => {
+  const redirectCategoryPage = async (id) => {
     setProductCategory([]);
-    localStorage.setItem("client_id", id);
+    localStorage.setItem("client_id", id.id);
 
-    axiosInstance
-      .post("/get_product_categories", {
+    if (id.services.length > 0) {
+      localStorage.setItem("service_id", id.services[0].id);
+    }
+
+    await axiosInstance
+      .post("/get_parent_products", {
         client_id: localStorage.getItem("client_id"),
+        service_id: localStorage.getItem("service_id"),
       })
       .then((response) => {
-        console.log(response)
         if (response.data.error_code === 200) {
           setProductCategory(response.data.data);
-
           setFormData({});
           setValidationErrors({});
           setCurrentQuestions([]);
@@ -91,11 +88,7 @@ const Home = () => {
       });
   };
 
-
-
-
   const handleOnChange = (productId) => {
-
     localStorage.setItem("product_id", productId);
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
@@ -110,15 +103,11 @@ const Home = () => {
   };
 
   const handleNextButtonClick = () => {
-
     const productId = localStorage.getItem("product_id");
-
 
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
-
-
 
     if (selectedCategory) {
       if (
@@ -126,7 +115,6 @@ const Home = () => {
         selectedCategory.feasibility.length > 0
       ) {
         handleShow();
-
       } else {
         pageNavigate("/consumer_preference");
       }
@@ -135,9 +123,33 @@ const Home = () => {
     }
   };
 
-  const handleChatbotNextClick = () => {
-    pageNavigate("/consumer_preference");
-  }
+  const handleChatbotNextClick = async () => {
+    setBtnLoading(true);
+    const getAttributesParamters = {
+      client_id: localStorage.getItem("client_id"),
+      service_id: localStorage.getItem("service_id"),
+      product_id: localStorage.getItem("product_id"),
+    };
+
+    try {
+      const response = await axiosInstance.post("/get_attributes", getAttributesParamters)
+      if (response.data.error_code === 200) {
+        setBtnLoading(false);
+        if (response.data.data.main_criteria_pairs.length > 0) {
+          handleClose();
+          pageNavigate("/consumer_preference");
+        } else {
+          handleShow();
+          setMainCreteriaContent(true);
+        }
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+
+  };
 
   const handleInputChange = (e, questionId) => {
     const userInput = e.target.value;
@@ -163,36 +175,31 @@ const Home = () => {
     const error = validateQuestion(currentQuestion);
     if (error) {
       if (error.type === "empty") {
-        toast.error("Input should not be empty")
+        toast.error("Input should not be empty");
       } else {
         toast(error, {
-          icon: (
-            <IoIosInformationCircleOutline className="infoToast me-1" />
-          ),
-        })
+          icon: <IoIosInformationCircleOutline className="infoToast me-1" />,
+        });
       }
-
     } else {
       if (currentQuestionIndex < currentQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       } else {
-
         setBtnLoading(true);
 
         const getAttributesParamters = {
           client_id: localStorage.getItem("client_id"),
-          product_category_id: localStorage.getItem("product_id"),
+          service_id: localStorage.getItem("service_id"),
+          product_id: localStorage.getItem("product_id"),
         };
         axiosInstance
           .post("/get_attributes", getAttributesParamters)
           .then((response) => {
             if (response.data.error_code === 200) {
-
               setBtnLoading(false);
               if (response.data.data.main_criteria_pairs.length > 0) {
                 handleClose();
                 pageNavigate("/consumer_preference");
-
               } else {
                 handleShow();
                 setMainCreteriaContent(true);
@@ -203,8 +210,7 @@ const Home = () => {
           })
           .catch((err) => {
             toast.error(err);
-          })
-
+          });
       }
     }
   };
@@ -219,7 +225,7 @@ const Home = () => {
     const userInput = formData[question.id];
 
     if (userInput === "" || userInput === undefined) {
-      return { err: "Inputs should not be empty", type: "empty" }
+      return { err: "Inputs should not be empty", type: "empty" };
     } else {
       switch (question.bountary_type) {
         case "in":
@@ -338,21 +344,18 @@ const Home = () => {
     );
   };
 
-
-
   const handleProductViewType = (productId, value) => {
-    setEnableViewButton(productId)
-    setActiveViewTypeButton(value)
-    const v = { [productId]: value, test: value }
-    setProductViewType(v)
-  }
-
+    setEnableViewButton(productId);
+    setActiveViewTypeButton(value);
+    const v = { [productId]: value, test: value };
+    setProductViewType(v);
+  };
 
   return (
     <div className="content-breadcrumps-below-content-height w-100 overflowY overflowX placeholder-glow">
       <div className="row g-3 pt-4 align-content-stretch">
-        {initialGlow ?
-          <div className="col-12 col-sm-6 col-lg-3" >
+        {initialGlow ? (
+          <div className="col-12 col-sm-6 col-lg-3">
             <div className="card rounded-4 border-0 h-100">
               <div className="card-body">
                 <div className="py-3">
@@ -369,8 +372,9 @@ const Home = () => {
               </div>
             </div>
           </div>
-          :
+        ) : (
           products.map((product) => (
+             product.name === "Toyota" ? null :
             <div key={product.id} className="col-12 col-sm-6 col-lg-3">
               <div className="card rounded-4 border-0 h-100">
                 <div className="card-body">
@@ -386,36 +390,64 @@ const Home = () => {
                   <p className="card-text">{product.desc}</p>
                 </div>
                 <div className="d-flex justify-content-evenly slider-chatbot-buttons-container mb-3  mx-3">
-                    <button type="button" className={`${(activeButton && productViewType[product.id]) === 'Slider' ? "btn btn-sm btn-primary w-40 viewButton" : "btn btn-sm btn-outline-secondary w-40 viewButton"}`} onClick={() => handleProductViewType(product.id, "Slider")} >
-                      Slider
-                    </button>
-                    <button  disabled={product.name === "TII" || product.name === "TII-2" ? true : false } className={`${(activeButton && productViewType[product.id]) === 'Chatbot'  ? "btn btn-sm btn-primary w-40 viewButton " :  "btn btn-sm btn-outline-secondary w-40 viewButton"}`} onClick={() => handleProductViewType(product.id, "Chatbot")}>
-                      Chatbot
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className={`${
+                      (activeButton && productViewType[product.id]) === "Slider"
+                        ? "btn btn-sm btn-primary w-40 viewButton"
+                        : "btn btn-sm btn-outline-secondary w-40 viewButton"
+                    }`}
+                    onClick={() => handleProductViewType(product.id, "Slider")}
+                  >
+                    Slider
+                  </button>
+                  <button
+                    disabled={
+                      product.name === "TII" || product.name === "TII-2" || product.name === "TII" || product.name === "Windows Company"
+                        ? true
+                        : false
+                    }
+                    className={`${
+                      (activeButton && productViewType[product.id]) ===
+                      "Chatbot"
+                        ? "btn btn-sm btn-primary w-40 viewButton "
+                        : "btn btn-sm btn-outline-secondary w-40 viewButton"
+                    }`}
+                    onClick={() => handleProductViewType(product.id, "Chatbot")}
+                  >
+                    Chatbot
+                  </button>
+                </div>
                 <div className="card-footer py-3 bg-white rounded-4">
                   <button
                     type="button"
                     className="btn btn-primary text-center w-100"
                     onClick={() => {
                       localStorage.removeItem("product_id");
-                      redirectCategoryPage(product.id)
+                      redirectCategoryPage(product);
                     }}
                     data-bs-toggle="modal"
                     data-bs-target={`#exampleModalToggle-${product.id}`}
-                    disabled={(activeButton === "") ? "disabled" : enableViewButton === product.id ? "" : "disabled"}
+                    disabled={
+                      activeButton === ""
+                        ? "disabled"
+                        : enableViewButton === product.id
+                        ? ""
+                        : "disabled"
+                    }
                   >
                     View consumer experience
                   </button>
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
 
       {/*Slider-Chatbot Modals */}
-      {products.map((product) => (
-        activeButton === "Slider" ?
+      {products.map((product) =>
+        activeButton === "Slider" ? (
           <div
             key={product.id}
             className="modal fade"
@@ -454,12 +486,12 @@ const Home = () => {
                     <option value="">Select service</option>
                     {productCategory.length > 0
                       ? productCategory.map((category, index) => {
-                        return (
-                          <option value={category.id} key={index}>
-                            {category.name}
-                          </option>
-                        );
-                      })
+                          return (
+                            <option value={category.id} key={index}>
+                              {category.name}
+                            </option>
+                          );
+                        })
                       : null}
                   </select>
                 </div>
@@ -476,7 +508,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-          :
+        ) : (
           <div
             key={product.id}
             className="modal fade"
@@ -503,7 +535,7 @@ const Home = () => {
                 </div>
                 <div className="modal-body">
                   <label htmlFor="service" className="form-label">
-                   What services are you looking for in {product.name} ?
+                    What services are you looking for in {product.name} ?
                   </label>
 
                   <select
@@ -515,12 +547,12 @@ const Home = () => {
                     <option value="">select service</option>
                     {productCategory.length > 0
                       ? productCategory.map((category, index) => {
-                        return (
-                          <option value={category.id} key={index}>
-                            {category.name}
-                          </option>
-                        );
-                      })
+                          return (
+                            <option value={category.id} key={index}>
+                              {category.name}
+                            </option>
+                          );
+                        })
                       : null}
                   </select>
                 </div>
@@ -537,12 +569,8 @@ const Home = () => {
               </div>
             </div>
           </div>
-
-      ))}
-
-
-
-
+        )
+      )}
 
       <Modal
         show={show}
@@ -557,7 +585,13 @@ const Home = () => {
         <Modal.Body>
           {mainCreteriaContent ? (
             <label className="form-label">
-              <img src={require("../Component/assets/businessDeal.png")} width={270} height={220} className="rounded mx-auto d-block mb-4" alt="..." />
+              <img
+                src={require("../Component/assets/businessDeal.png")}
+                width={270}
+                height={220}
+                className="rounded mx-auto d-block mb-4"
+                alt="..."
+              />
               Thank you for answering our questions. Someone from our team will
               be in touch with you shortly!
             </label>
@@ -591,7 +625,6 @@ const Home = () => {
           </Modal.Footer>
         )}
       </Modal>
-
     </div>
   );
 };
