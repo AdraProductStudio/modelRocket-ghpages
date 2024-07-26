@@ -296,7 +296,7 @@ const AdminForm1 = () => {
         <div className="admin-page-content-height py-4 placeholder-glow">
             <div className="card h-100 overflowY overflowX py-3">
                 <div className="w-100 p-3">
-                    <button className="btn btn-outline-secondary d-flex align-items-center gap-2 ms-1" onClick={() => {
+                    <button className="btn btn-outline-secondary d-flex align-items-center gap-2 ms-1 py-1 px-2" onClick={() => {
                         pageRender("/")
                     }}>
                         <IoChevronBackCircle className="fs-5" /> Back
