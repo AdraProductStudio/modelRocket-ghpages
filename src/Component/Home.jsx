@@ -149,8 +149,10 @@ const Home = () => {
           handleClose();
           pageNavigate("/consumer_preference");
         } else {
-          handleShow();
-          setMainCreteriaContent(true);
+          handleClose();
+          pageNavigate("/consumer_preference");
+          // handleShow();
+          // setMainCreteriaContent(true);
         }
       } else {
         toast.error(response.data.message);

@@ -102,9 +102,17 @@ const ConsumerPreferenceChatbotLayout = () => {
             setchatbotMessage(response.data.data.message);
             setConversationId(response.data.data.conversation_id);
             setIsDataLoaded(true);
-            if(localStorage.getItem("selectedCategory") !== null){
+
+            if (localStorage.getItem("productName") !== null &&
+                localStorage.getItem("productName") === "Windows Company" ||
+                localStorage.getItem("productName") === "TII"
+            ){
+              if(localStorage.getItem("selectedCategory") !== null){
                 setUserTextInput(localStorage.getItem("selectedCategory"))
             }
+            }
+
+            
           })
           .catch((err) => {
             console.log(err);
@@ -121,6 +129,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     if (isDataLoaded) {
         handleSubmit(); // Call handleSubmit when data is loaded
         localStorage.removeItem("selectedCategory")
+        localStorage.removeItem("productName")
     }
 }, [isDataLoaded]);
 
