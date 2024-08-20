@@ -94,6 +94,8 @@ const ConsumerPreferenceChatbotLayout = () => {
         usr_phoneno: randomNumber,
       };
 
+      console.log(requiredParams)
+
       try {
         await axiosInstance
           .post("/chatbot", requiredParams)
@@ -291,6 +293,8 @@ const ConsumerPreferenceChatbotLayout = () => {
     };
     
 
+    console.log(requiredParams)
+
     try {
       const result = await axiosInstance.post("/chatbot", requiredParams);      
       if (result.data.error_code === 200) {        
@@ -341,7 +345,7 @@ const ConsumerPreferenceChatbotLayout = () => {
           }
         }
         setGraphData(newData);
-        setInit(!init);
+        // setInit(!init);
       }
     } catch (error) {
       console.error("Error:", error);
