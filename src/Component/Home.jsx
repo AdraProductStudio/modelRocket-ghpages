@@ -7,8 +7,57 @@ import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import CommonContext from "./CommonContext";
+import axios from "axios";
 
 const Home = () => {
+  useEffect(() => {
+    setInitialGlow(true);
+    const getToken = async () => {
+      try {
+        const username = "matsuri";
+        const password =
+          "fc153ac36455604c6a6bcb3e22c0a4debfb746d59ad4a33a4b0d50f315206958d78da64e88957993e537e5ef235537a65ac0bc8fbaa725ae3e8e151617e82b81";
+
+        const basicAuth = "Basic " + btoa(`${username}:${password}`);
+
+        const response = await axios.get(
+          "https://consumerapi.matsuritech.com/gettoken",
+          {
+            headers: {
+              Authorization: basicAuth,
+            },
+          }
+        );
+        if (response.data.error_code === 200) {
+          fetchData();
+          localStorage.setItem("token", response.data.data.token);
+        }
+      } catch (error) {
+        console.error("Error getting token:", error);
+        throw error;
+      }
+    };
+
+    getToken();
+
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get("/get_clients");
+        if (response.data.error_code === 200) {
+          setProducts(response.data.data);
+          setInitialGlow(false);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error("Session expired, please try again...!");
+
+        console.error("Error fetching data:", error);
+        // toast.error("Failed to fetch data");
+      }
+    };
+  }, []);
+
   const { productViewType, setProductViewType } = useContext(CommonContext);
 
   const [products, setProducts] = useState([]);
@@ -28,6 +77,11 @@ const Home = () => {
   };
   const handleShow = () => setShow(true);
 
+  const [initialModalshow, setinitialModalShow] = useState(false);
+
+  const handleInitialModalClose = () => setinitialModalShow(false);
+  const handleInitialModalShow = () => setinitialModalShow(true);
+
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -41,29 +95,9 @@ const Home = () => {
 
   const pageNavigate = useNavigate();
 
-  useEffect(() => {
-    setInitialGlow(true);
 
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get("/get_clients");
-        if (response.data.error_code === 200) {
-          setProducts(response.data.data);
-          setInitialGlow(false);
-        } else {
-          toast.error(response.data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to fetch data");
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const redirectCategoryPage = async (id, productName) => {
-    console.log(productName);
     localStorage.setItem("productName", productName);
 
     setProductCategory([]);
@@ -73,22 +107,35 @@ const Home = () => {
       localStorage.setItem("service_id", id.services[0].id);
     }
 
-    await axiosInstance
-      .post("/get_parent_products", {
+    try {
+      const response = await axiosInstance.post("/get_parent_products", {
         client_id: localStorage.getItem("client_id"),
         service_id: localStorage.getItem("service_id"),
-      })
-      .then((response) => {
-        if (response.data.error_code === 200) {
-          setProductCategory(response.data.data);
-          setFormData({});
-          setValidationErrors({});
-          setCurrentQuestions([]);
-          setCurrentQuestionIndex(0);
-        } else {
-          toast.error(response.data.message);
-        }
       });
+
+      if (response.data.error_code === 200) {
+        handleInitialModalShow();
+        setProductCategory(response.data.data);
+        setFormData({});
+        setValidationErrors({});
+        setCurrentQuestions([]);
+        setCurrentQuestionIndex(0);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        error.response.data.msg === "Token has expired"
+      ) {
+        handleInitialModalClose();
+        toast.error("Session expired, please try again...!");
+      }
+      console.log(error);
+    }
+
+
   };
 
   const handleOnChange = (productId) => {
@@ -96,8 +143,7 @@ const Home = () => {
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
-
-    console.log(selectedCategory.name);
+    
     if (localStorage.getItem("productName"))
       localStorage.setItem("selectedCategory", selectedCategory.name);
 
@@ -121,6 +167,7 @@ const Home = () => {
         selectedCategory.feasibility &&
         selectedCategory.feasibility.length > 0
       ) {
+        handleInitialModalClose();
         handleShow();
       } else {
         pageNavigate("/consumer_preference");
@@ -147,6 +194,7 @@ const Home = () => {
         setBtnLoading(false);
         if (response.data.data.main_criteria_pairs.length > 0) {
           handleClose();
+          localStorage.setItem("chatbot_used", true);
           pageNavigate("/consumer_preference");
         } else {
           handleClose();
@@ -158,7 +206,14 @@ const Home = () => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      toast.error(error);
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        error.response.data.msg === "Token has expired"
+      ) {
+        handleClose();
+        toast.error("Session expired, please try again...!");
+      }
     }
   };
 
@@ -219,8 +274,16 @@ const Home = () => {
               toast.error(response.data.message);
             }
           })
-          .catch((err) => {
-            toast.error(err);
+          .catch((error) => {
+            if (
+              error.response &&
+              error.response.status === 401 &&
+              error.response.data.msg === "Token has expired"
+            ) {
+              handleClose();
+              setBtnLoading(false);
+              toast.error("Session expired, please try again...!");
+            }
           });
       }
     }
@@ -362,6 +425,10 @@ const Home = () => {
     setProductViewType(v);
   };
 
+  if (localStorage.getItem("chatbot_used") === true) {
+    alert("Yes its true");
+  }
+
   return (
     <div className="content-breadcrumps-below-content-height w-100 overflowY overflowX placeholder-glow">
       <div className="row g-3 pt-4 align-content-stretch">
@@ -442,8 +509,8 @@ const Home = () => {
                         localStorage.removeItem("product_id");
                         redirectCategoryPage(product, product.name);
                       }}
-                      data-bs-toggle="modal"
-                      data-bs-target={`#exampleModalToggle-${product.id}`}
+                      // data-bs-toggle="modal"
+                      // data-bs-target={`#exampleModalToggle-${product.id}`}
                       disabled={
                         activeButton === ""
                           ? "disabled"
@@ -646,6 +713,55 @@ const Home = () => {
           </Modal.Footer>
         )}
       </Modal>
+
+      <>
+        <Modal
+          show={initialModalshow}
+          onHide={handleInitialModalClose}
+          backdrop="static"
+          keyboard={false}
+          centered
+        >
+          <Modal.Header closeButton>
+            {/* <Modal.Title>What service are you looking for?</Modal.Title> */}
+          </Modal.Header>
+          <Modal.Body>
+            <label htmlFor="service" className="form-label">
+              What services are you looking for ?
+            </label>
+
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              name="Default_select_example"
+              onChange={(e) => handleOnChange(e.target.value)}
+            >
+              <option value="">select service</option>
+              {productCategory.length > 0
+                ? productCategory.map((category, index) => {
+                    return (
+                      <option value={category.id} key={index}>
+                        {category.name}
+                      </option>
+                    );
+                  })
+                : null}
+            </select>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="primary"
+              onClick={
+                activeButton === "Slider"
+                  ? handleNextButtonClick
+                  : handleChatbotNextClick
+              }
+            >
+              Next
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
     </div>
   );
 };

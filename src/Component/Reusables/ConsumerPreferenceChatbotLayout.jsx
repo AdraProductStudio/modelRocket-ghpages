@@ -97,22 +97,20 @@ const ConsumerPreferenceChatbotLayout = () => {
       try {
         await axiosInstance
           .post("/chatbot", requiredParams)
-          .then((response) => {
-            console.log(response);
+          .then((response) => {            
             setchatbotMessage(response.data.data.message);
             setConversationId(response.data.data.conversation_id);
             setIsDataLoaded(true);
 
-            if (localStorage.getItem("productName") !== null &&
-                localStorage.getItem("productName") === "Windows Company" ||
-                localStorage.getItem("productName") === "TII"
-            ){
-              if(localStorage.getItem("selectedCategory") !== null){
-                setUserTextInput(localStorage.getItem("selectedCategory"))
+            if (
+              (localStorage.getItem("productName") !== null &&
+                localStorage.getItem("productName") === "Windows Company") ||
+              localStorage.getItem("productName") === "TII"
+            ) {
+              if (localStorage.getItem("selectedCategory") !== null) {
+                setUserTextInput(localStorage.getItem("selectedCategory"));
+              }
             }
-            }
-
-            
           })
           .catch((err) => {
             console.log(err);
@@ -127,11 +125,11 @@ const ConsumerPreferenceChatbotLayout = () => {
 
   useEffect(() => {
     if (isDataLoaded) {
-        handleSubmit(); // Call handleSubmit when data is loaded
-        localStorage.removeItem("selectedCategory")
-        localStorage.removeItem("productName")
+      handleSubmit(); // Call handleSubmit when data is loaded
+      localStorage.removeItem("selectedCategory");
+      localStorage.removeItem("productName");
     }
-}, [isDataLoaded]);
+  }, [isDataLoaded]);
 
   useEffect(() => {
     if (mainCriteriaPairs.length > 0) {
@@ -139,8 +137,6 @@ const ConsumerPreferenceChatbotLayout = () => {
       setSliderValues(defaultValues);
     }
   }, [mainCriteriaPairs]);
-
-  
 
   const convertSliderValue = (value) => {
     switch (value) {
@@ -214,6 +210,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         updatedApiRequest
       );
 
+      // console.log(response.data.data.criteria_weights)
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
@@ -292,11 +289,11 @@ const ConsumerPreferenceChatbotLayout = () => {
       flag: stage,
       usr_phoneno: randomNumber,
     };
+    
 
     try {
-      const result = await axiosInstance.post("/chatbot", requiredParams);
-      if (result.data.error_code === 200) {
-        console.log(result);
+      const result = await axiosInstance.post("/chatbot", requiredParams);      
+      if (result.data.error_code === 200) {        
         setTimeout(() => {
           getOfferProduct();
         }, 2000);
@@ -309,8 +306,14 @@ const ConsumerPreferenceChatbotLayout = () => {
       } else {
         return "Hey! Something went wrong. Can you please ask again";
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        error.response.data.msg === "Token has expired"
+      ) {
+        return "Session Expired! Please try again...!";        
+      }
     }
   };
 
@@ -323,6 +326,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     try {
       const response = await axiosInstance.post("/get_offer", requiredParams);
 
+      // console.log(response.data.data.criteria_weights)
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
@@ -345,10 +349,9 @@ const ConsumerPreferenceChatbotLayout = () => {
   };
 
   const handleSubmit = async () => {
-  let input;
+    let input;
     if (!userTextInput.trim()) return;
     input = userTextInput;
-
 
     const userMessage = { text: input, user: true };
     setMessages((prevMessages) => [...prevMessages, userMessage]);

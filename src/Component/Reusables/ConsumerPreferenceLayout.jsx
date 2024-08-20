@@ -47,8 +47,14 @@ const ConsumerPreferenceLayout = () => {
 
           handleDone(props);
         });
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.status === 401 &&
+          error.response.data.msg === "Token has expired"
+        ) {
+          return "Session Expired! Please try again...!";        
+        }
       }
     };
 
@@ -146,7 +152,13 @@ const ConsumerPreferenceLayout = () => {
         console.log(response.data.message);
       }
     } catch (error) {
-      console.error("Error:", error);
+      if (
+        error.response &&
+        error.response.status === 401 &&
+        error.response.data.msg === "Token has expired"
+      ) {
+        return "Session Expired! Please try again...!";        
+      }
     }
   };
 
