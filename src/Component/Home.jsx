@@ -95,8 +95,6 @@ const Home = () => {
 
   const pageNavigate = useNavigate();
 
-
-
   const redirectCategoryPage = async (id, productName) => {
     localStorage.setItem("productName", productName);
 
@@ -134,8 +132,6 @@ const Home = () => {
       }
       console.log(error);
     }
-
-
   };
 
   const handleOnChange = (productId) => {
@@ -143,7 +139,7 @@ const Home = () => {
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
-    
+
     if (localStorage.getItem("productName"))
       localStorage.setItem("selectedCategory", selectedCategory.name);
 
@@ -452,7 +448,7 @@ const Home = () => {
           </div>
         ) : (
           products.map((product) =>
-            product.name === "Toyota" ? null : (
+            product.name === "Toyota" || product.name === "Unger Cleaning Tools" ? null : (
               <div key={product.id} className="col-12 col-sm-6 col-lg-3">
                 <div className="card rounded-4 border-0 h-100">
                   <div className="card-body">

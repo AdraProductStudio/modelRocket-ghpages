@@ -94,7 +94,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         usr_phoneno: randomNumber,
       };
 
-      console.log(requiredParams)
+      // console.log(requiredParams)
 
       try {
         await axiosInstance
@@ -212,7 +212,7 @@ const ConsumerPreferenceChatbotLayout = () => {
         updatedApiRequest
       );
 
-      // console.log(response.data.data.criteria_weights)
+      console.log(response.data.data.criteria_weights)
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
@@ -293,7 +293,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     };
     
 
-    console.log(requiredParams)
+    // console.log(requiredParams)
 
     try {
       const result = await axiosInstance.post("/chatbot", requiredParams);      
@@ -330,7 +330,7 @@ const ConsumerPreferenceChatbotLayout = () => {
     try {
       const response = await axiosInstance.post("/get_offer", requiredParams);
 
-      // console.log(response.data.data.criteria_weights)
+      console.log(response.data.data.criteria_weights)
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);

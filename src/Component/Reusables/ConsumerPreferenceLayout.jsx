@@ -6,6 +6,7 @@ import { Tooltip } from "react-tooltip";
 import { FaInfoCircle } from "react-icons/fa";
 import ConsumerPreferenceChatbotLayout from "./ConsumerPreferenceChatbotLayout";
 import CommonContext from "../CommonContext";
+import toast from "react-hot-toast";
 
 const ConsumerPreferenceLayout = () => {
   const { productViewType } = useContext(CommonContext);
@@ -127,7 +128,7 @@ const ConsumerPreferenceLayout = () => {
         filters: { criteria: "", condition: "", value1: "", value2: "" },
       };
 
-      next();
+     
     } else {
       const defaultValuesSetting = Array(
         params.requestData.main_criteria_pairs.length
@@ -148,6 +149,7 @@ const ConsumerPreferenceLayout = () => {
       if (response.data.error_code === 200) {
         setProductComparison(response.data.data.product_comparisons);
         setGraphData(response.data.data.criteria_weights);
+        next();
       } else {
         console.log(response.data.message);
       }
@@ -156,8 +158,8 @@ const ConsumerPreferenceLayout = () => {
         error.response &&
         error.response.status === 401 &&
         error.response.data.msg === "Token has expired"
-      ) {
-        return "Session Expired! Please try again...!";        
+      ) {        
+        toast.error("Session Expired! Please try again...!");        
       }
     }
   };
