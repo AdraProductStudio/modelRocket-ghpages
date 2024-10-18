@@ -4,26 +4,25 @@ let token = null;
 
 const axiosInstance = axios.create({
   // baseURL: "http://10.10.24.1:5000/",
-  baseURL:"https://consumerapi.matsuritech.com/",
+  baseURL: process.env.REACT_APP_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-const getToken = async () => {  
+const getToken = async () => {
   try {
-    const username = "matsuri";
-    const password =
-      "fc153ac36455604c6a6bcb3e22c0a4debfb746d59ad4a33a4b0d50f315206958d78da64e88957993e537e5ef235537a65ac0bc8fbaa725ae3e8e151617e82b81";
-
+    const username = process.env.REACT_APP_USERNAME;
+    const password = process.env.REACT_APP_PASSWORD;
+    
     const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
-    const response = await axios.get("https://consumerapi.matsuritech.com/gettoken", {
+    const response = await axios.get(`${process.env.REACT_APP_API_URL}/gettoken`, {
       headers: {
         Authorization: basicAuth,
       },
     });
-    
+
 
     if (response.data.error_code === 200) {
       localStorage.setItem("token", response.data.data.token);
@@ -43,13 +42,12 @@ axiosInstance.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
-    if (
-      error.response &&
-      error.response.status === 401 &&
-      error.response.data.msg === "Token has expired"
-    ) {
-      getToken();
+  async(error) => {
+    const originalRequest = error.config;
+    if (error.response && error.response.status === 401 &&error.response.data.msg === "Token has expired") {
+      originalRequest._retry = true;
+      await getToken();
+      return axiosInstance(originalRequest);
     }
     return Promise.reject(error);
   }

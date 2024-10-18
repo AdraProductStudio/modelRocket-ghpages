@@ -314,7 +314,7 @@ const AdminForm1 = () => {
                                         {
                                             clientDetails.map((v, i) => {
 
-                                                 return v.name === "Toyota" || v.name === "Unger Cleaning Tools" ? null : <option value={[v.id, v.services[0].id]} key={i}>{v.name}</option>
+                                                 return v.name === "Toyota" || v.name === "Unger Cleaning Tools" || v.name.toLowerCase().includes("demo") ? null : <option value={[v.id, v.services[0].id]} key={i}>{v.name}</option>
                                             })
                                         }
                                     </select>

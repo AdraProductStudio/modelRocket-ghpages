@@ -14,14 +14,12 @@ const Home = () => {
     setInitialGlow(true);
     const getToken = async () => {
       try {
-        const username = "matsuri";
-        const password =
-          "fc153ac36455604c6a6bcb3e22c0a4debfb746d59ad4a33a4b0d50f315206958d78da64e88957993e537e5ef235537a65ac0bc8fbaa725ae3e8e151617e82b81";
+        const username = process.env.REACT_APP_USERNAME;
+        const password =process.env.REACT_APP_PASSWORD;
 
         const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
-        const response = await axios.get(
-          "https://consumerapi.matsuritech.com/gettoken",
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/gettoken`,
           {
             headers: {
               Authorization: basicAuth,
@@ -448,7 +446,7 @@ const Home = () => {
           </div>
         ) : (
           products.map((product) =>
-            product.name === "Toyota" || product.name === "Unger Cleaning Tools" ? null : (
+            product.name === "Toyota" || product.name === "Unger Cleaning Tools" || product.name.toLowerCase().includes("demo") ? null : (
               <div key={product.id} className="col-12 col-sm-6 col-lg-3">
                 <div className="card rounded-4 border-0 h-100">
                   <div className="card-body">
