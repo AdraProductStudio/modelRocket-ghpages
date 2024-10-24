@@ -15,7 +15,7 @@ const Home = () => {
     const getToken = async () => {
       try {
         const username = process.env.REACT_APP_USERNAME;
-        const password =process.env.REACT_APP_PASSWORD;
+        const password = process.env.REACT_APP_PASSWORD;
 
         const basicAuth = "Basic " + btoa(`${username}:${password}`);
 
@@ -139,7 +139,7 @@ const Home = () => {
     );
 
     if (localStorage.getItem("productName"))
-      localStorage.setItem("selectedCategory", selectedCategory.name);
+      localStorage.setItem("selectedCategory", selectedCategory?.name);
 
     if (selectedCategory) {
       setCurrentQuestions(selectedCategory.feasibility);
@@ -151,7 +151,7 @@ const Home = () => {
 
   const handleNextButtonClick = () => {
     const productId = localStorage.getItem("product_id");
-
+    
     const selectedCategory = productCategory.find(
       (category) => category.id === parseInt(productId)
     );
@@ -172,42 +172,47 @@ const Home = () => {
   };
 
   const handleChatbotNextClick = async () => {
-    setBtnLoading(true);
-    const getAttributesParamters = {
-      client_id: localStorage.getItem("client_id"),
-      service_id: localStorage.getItem("service_id"),
-      product_id: localStorage.getItem("product_id"),
-    };
+    if (localStorage.getItem("selectedCategory")) {
 
-    try {
-      const response = await axiosInstance.post(
-        "/get_attributes",
-        getAttributesParamters
-      );
-      if (response.data.error_code === 200) {
-        setBtnLoading(false);
-        if (response.data.data.main_criteria_pairs.length > 0) {
-          handleClose();
-          localStorage.setItem("chatbot_used", true);
-          pageNavigate("/consumer_preference");
+      setBtnLoading(true);
+      const getAttributesParamters = {
+        client_id: localStorage.getItem("client_id"),
+        service_id: localStorage.getItem("service_id"),
+        product_id: localStorage.getItem("product_id"),
+      };
+
+      try {
+        const response = await axiosInstance.post(
+          "/get_attributes",
+          getAttributesParamters
+        );
+        if (response.data.error_code === 200) {
+          setBtnLoading(false);
+          if (response.data.data.main_criteria_pairs.length > 0) {
+            handleClose();
+            localStorage.setItem("chatbot_used", true);
+            pageNavigate("/consumer_preference");
+          } else {
+            handleClose();
+            pageNavigate("/consumer_preference");
+            // handleShow();
+            // setMainCreteriaContent(true);
+          }
         } else {
-          handleClose();
-          pageNavigate("/consumer_preference");
-          // handleShow();
-          // setMainCreteriaContent(true);
+          toast.error(response.data.message);
         }
-      } else {
-        toast.error(response.data.message);
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.status === 401 &&
+          error.response.data.msg === "Token has expired"
+        ) {
+          handleClose();
+          toast.error("Session expired, please try again...!");
+        }
       }
-    } catch (error) {
-      if (
-        error.response &&
-        error.response.status === 401 &&
-        error.response.data.msg === "Token has expired"
-      ) {
-        handleClose();
-        toast.error("Session expired, please try again...!");
-      }
+    } else {
+      toast.error("Selected category not found.");
     }
   };
 
@@ -464,12 +469,11 @@ const Home = () => {
                   <div className="d-flex justify-content-evenly slider-chatbot-buttons-container mb-3 mx-3">
                     <button
                       type="button"
-                      className={`${
-                        (activeButton && productViewType[product.id]) ===
-                        "Slider"
+                      className={`${(activeButton && productViewType[product.id]) ===
+                          "Slider"
                           ? "btn btn-sm btn-primary w-40 viewButton"
                           : "btn btn-sm btn-outline-secondary w-40 viewButton"
-                      }`}
+                        }`}
                       onClick={() =>
                         handleProductViewType(product.id, "Slider")
                       }
@@ -482,12 +486,11 @@ const Home = () => {
                       // ? true
                       // : false
                       // }
-                      className={`${
-                        (activeButton && productViewType[product.id]) ===
-                        "Chatbot"
+                      className={`${(activeButton && productViewType[product.id]) ===
+                          "Chatbot"
                           ? "btn btn-sm btn-primary w-40 viewButton "
                           : "btn btn-sm btn-outline-secondary w-40 viewButton"
-                      }`}
+                        }`}
                       onClick={() =>
                         handleProductViewType(product.id, "Chatbot")
                       }
@@ -509,8 +512,8 @@ const Home = () => {
                         activeButton === ""
                           ? "disabled"
                           : enableViewButton === product.id
-                          ? ""
-                          : "disabled"
+                            ? ""
+                            : "disabled"
                       }
                     >
                       View consumer experience
@@ -564,16 +567,16 @@ const Home = () => {
                     <option value="">Select service</option>
                     {productCategory.length > 0
                       ? productCategory.map((category, index) => {
-                          return (
-                            <option
-                              value={category.id}
-                              key={index}
-                              onClick={() => console.log(category.name)}
-                            >
-                              {category.name}
-                            </option>
-                          );
-                        })
+                        return (
+                          <option
+                            value={category.id}
+                            key={index}
+                            onClick={() => console.log(category.name)}
+                          >
+                            {category.name}
+                          </option>
+                        );
+                      })
                       : null}
                   </select>
                 </div>
@@ -629,12 +632,12 @@ const Home = () => {
                     <option value="">select service</option>
                     {productCategory.length > 0
                       ? productCategory.map((category, index) => {
-                          return (
-                            <option value={category.id} key={index}>
-                              {category.name}
-                            </option>
-                          );
-                        })
+                        return (
+                          <option value={category.id} key={index}>
+                            {category.name}
+                          </option>
+                        );
+                      })
                       : null}
                   </select>
                 </div>
@@ -733,12 +736,12 @@ const Home = () => {
               <option value="">select service</option>
               {productCategory.length > 0
                 ? productCategory.map((category, index) => {
-                    return (
-                      <option value={category.id} key={index}>
-                        {category.name}
-                      </option>
-                    );
-                  })
+                  return (
+                    <option value={category.id} key={index}>
+                      {category.name}
+                    </option>
+                  );
+                })
                 : null}
             </select>
           </Modal.Body>

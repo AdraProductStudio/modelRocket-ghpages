@@ -364,7 +364,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
     setMessages((prevMessages) => [...prevMessages, essenceMessage]);
     setTimeout(() => {
-      document.querySelector("#scrollView").scrollIntoView({
+      document.querySelector("#scrollView")?.scrollIntoView({
         behavior: "smooth",
       });
     }, 1);
@@ -383,7 +383,7 @@ const ConsumerPreferenceChatbotLayout = () => {
 
     setUserTextInput("");
     setTimeout(() => {
-      document.querySelector("#scrollView").scrollIntoView({
+      document.querySelector("#scrollView")?.scrollIntoView({
         behavior: "smooth",
       });
     }, 1);
